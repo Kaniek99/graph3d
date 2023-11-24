@@ -107,9 +107,12 @@ namespace xe {
         GLuint link_program(GLuint program) {
             glLinkProgram(program);
             GLint link_status;
+            GLchar infoLog[512];
             glGetProgramiv(program, GL_LINK_STATUS, &link_status);
             if (!link_status) {
                 std::cerr << "Error linking program\n";
+                glGetProgramInfoLog(program, 512, NULL, infoLog);
+                std::cout << infoLog << std::endl;
                 GLint max_log_length = 0;
                 glGetProgramiv(program, GL_INFO_LOG_LENGTH, &max_log_length);
                 return 0;
