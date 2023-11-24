@@ -27,8 +27,12 @@ void SimpleShapeApplication::init() {
             -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
             -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
             0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+            0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
             0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-            0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
+            -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+            -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+            0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+            0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0
     };
 
     // Generating the buffer and loading the vertex data into it.
@@ -70,7 +74,7 @@ void SimpleShapeApplication::init() {
 void SimpleShapeApplication::frame() {
     // Binding the VAO will setup all the required vertex buffers.
     glBindVertexArray(vao_);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
+    glDrawArrays(GL_TRIANGLES, 0, 9);
     // glRectf(-0.5f, 0.0f, 0.5f, -0.5f);
     glBindVertexArray(0);
 }
