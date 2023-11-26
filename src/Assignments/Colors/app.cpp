@@ -32,7 +32,7 @@ void SimpleShapeApplication::init() {
             -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
             -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
             0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-            0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0
+            0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
     };
 
     // Generating the buffer and loading the vertex data into it.
@@ -75,6 +75,5 @@ void SimpleShapeApplication::frame() {
     // Binding the VAO will setup all the required vertex buffers.
     glBindVertexArray(vao_);
     glDrawArrays(GL_TRIANGLES, 0, 9);
-    // glRectf(-0.5f, 0.0f, 0.5f, -0.5f);
     glBindVertexArray(0);
 }

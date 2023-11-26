@@ -69,6 +69,5 @@ void SimpleShapeApplication::frame() {
     // Binding the VAO will setup all the required vertex buffers.
     glBindVertexArray(vao_);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
-    // glRectf(-0.5f, 0.0f, 0.5f, -0.5f);
     glBindVertexArray(0);
 }
