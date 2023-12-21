@@ -9,6 +9,7 @@
 #include <tuple>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "Application/utils.h"
 
@@ -61,22 +62,31 @@ void SimpleShapeApplication::init() {
     glBufferSubData(GL_UNIFORM_BUFFER, 4 * sizeof(GLfloat), 3 * sizeof(GLfloat), &color);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    float theta = 1.0 * glm::pi<float>() / 6.0f;
-    auto cs = std::cos(theta);
-    auto ss = std::sin(theta);
-    glm::mat2 rot{cs,ss,-ss,cs};
-    glm::vec2 trans{0.0, -0.25};
-    glm::vec2 scale{0.5, 0.5};
+    glm::mat4 projection = glm::perspective(
+        glm::radians(60.0f),
+        16.0f / 9.0f,
+        0.1f,
+        100.0f
+    );
 
-    GLuint UBO_transformation;
-    glGenBuffers(1, &UBO_transformation);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, UBO_transformation);
-    glBindBuffer(GL_UNIFORM_BUFFER, UBO_transformation);
-    glBufferData(GL_UNIFORM_BUFFER, 12 * sizeof(float), nullptr, GL_STATIC_DRAW);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, 2 * sizeof(GLfloat), &scale);
-    glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(GLfloat), 2 * sizeof(GLfloat), &trans);
-    glBufferSubData(GL_UNIFORM_BUFFER, 4 * sizeof(GLfloat), 2 * sizeof(GLfloat), &rot[0]);
-    glBufferSubData(GL_UNIFORM_BUFFER, 8 * sizeof(GLfloat), 2 * sizeof(GLfloat), &rot[1]);
+    glm::mat4 view = glm::lookAt(
+        glm::vec3(3, 3, 7),
+        glm::vec3(0, 0, 0),
+        glm::vec3(0, 1, 0)
+    );
+
+    glm::mat4 model(1.0f);
+
+    glm::mat4 PVM = projection * view * model;
+
+    glGenBuffers(1, &UBO_modifier);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, UBO_modifier);
+    glBindBuffer(GL_UNIFORM_BUFFER, UBO_modifier);
+    glBufferData(GL_UNIFORM_BUFFER, 16 * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, 4 * sizeof(GLfloat), &PVM[0]);
+    glBufferSubData(GL_UNIFORM_BUFFER, 4 * sizeof(GLfloat), 4 * sizeof(GLfloat), &PVM[1]);
+    glBufferSubData(GL_UNIFORM_BUFFER, 8 * sizeof(GLfloat), 4 * sizeof(GLfloat), &PVM[2]);
+    glBufferSubData(GL_UNIFORM_BUFFER, 12 * sizeof(GLfloat), 4 * sizeof(GLfloat), &PVM[3]);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     // This setups a Vertex Array Object (VAO) that  encapsulates
