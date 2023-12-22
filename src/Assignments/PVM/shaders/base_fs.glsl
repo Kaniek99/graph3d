@@ -9,5 +9,5 @@ layout(std140, binding = 0) uniform Modifier {
 };
 
 void main() {
-    vFragColor = vec4(color[0]*strength, color[1]*strength, color[2]*strength, 1.0);
+    vFragColor = vec4(a_vertex_color_out[0]*color[0]*strength, a_vertex_color_out[1]*color[1]*strength, a_vertex_color_out[2]*color[2]*strength, a_vertex_color_out[3]*1.0);
 }
