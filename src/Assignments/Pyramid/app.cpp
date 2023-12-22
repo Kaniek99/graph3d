@@ -15,7 +15,6 @@
 
 void SimpleShapeApplication::init() {
     // A utility function that reads the shader sources, compiles them and creates the program object
-    // As everything in OpenGL we reference program by an integer "handle".
     auto program = xe::utils::create_program(
             {{GL_VERTEX_SHADER,   std::string(PROJECT_DIR) + "/shaders/base_vs.glsl"},
              {GL_FRAGMENT_SHADER, std::string(PROJECT_DIR) + "/shaders/base_fs.glsl"}});
@@ -27,11 +26,11 @@ void SimpleShapeApplication::init() {
 
     // A vector containing the x,y,z vertex coordinates for the triangle.
     std::vector<GLfloat> vertices = {
-            -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-            -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-            0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-            0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-            0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
+            -0.5f, 0.0f, 0.0f,
+            -0.5f, -0.5f, 0.0f,
+            0.5f, -0.5f, 0.0f,
+            0.5f, 0.0f, 0.0f,
+            0.0f, 0.5f, 0.0f
     };
 
     // Generating the buffer and loading the vertex data into it.
@@ -57,7 +56,7 @@ void SimpleShapeApplication::init() {
     glGenBuffers(1, &UBO_modifier);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, UBO_modifier);
     glBindBuffer(GL_UNIFORM_BUFFER, UBO_modifier);
-    glBufferData(GL_UNIFORM_BUFFER, 8 * sizeof(float), nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, 8 * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(GLfloat), &strength);
     glBufferSubData(GL_UNIFORM_BUFFER, 4 * sizeof(GLfloat), 3 * sizeof(GLfloat), &color);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -100,8 +99,7 @@ void SimpleShapeApplication::init() {
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     // and this specifies how the data is layout in the buffer.
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(0));
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(3 * sizeof(GLfloat)));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(0));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBO_indexes);
