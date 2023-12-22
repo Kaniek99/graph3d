@@ -79,9 +79,10 @@ void SimpleShapeApplication::init() {
 
     glm::mat4 PVM = projection * view * model;
 
-    glGenBuffers(1, &UBO_modifier);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, UBO_modifier);
-    glBindBuffer(GL_UNIFORM_BUFFER, UBO_modifier);
+    GLuint UBO_PVM;
+    glGenBuffers(1, &UBO_PVM);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, UBO_PVM);
+    glBindBuffer(GL_UNIFORM_BUFFER, UBO_PVM);
     glBufferData(GL_UNIFORM_BUFFER, 16 * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, 4 * sizeof(GLfloat), &PVM[0]);
     glBufferSubData(GL_UNIFORM_BUFFER, 4 * sizeof(GLfloat), 4 * sizeof(GLfloat), &PVM[1]);
