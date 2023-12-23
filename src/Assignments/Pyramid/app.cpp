@@ -24,13 +24,28 @@ void SimpleShapeApplication::init() {
         exit(-1);
     }
 
-    // A vector containing the x,y,z vertex coordinates for the triangle.
+    // A vector containing the x,y,z vertex coordinates for the pyramid.
     std::vector<GLfloat> vertices = {
-            -0.5f, 0.0f, 0.0f,
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-            0.5f, 0.0f, 0.0f,
-            0.0f, 0.5f, 0.0f
+        0.5f, -0.5f, 0.0f, 0.22f, 0.59f, 0.51f, 1.0f,
+        0.0f, 0.0f, 1.0f, 0.22f, 0.59f, 0.51f, 1.0f,
+        -0.5f, -0.5f, 0.0f, 0.22f, 0.59f, 0.51f, 1.0f,
+
+        -0.5f, -0.5f, 0.0f, 0.69f, 0.64f, 0.59f, 1.0f,
+        0.0f, 0.0f, 1.0f, 0.69f, 0.64f, 0.59f, 1.0f,
+        -0.5f, 0.5f, 0.0f, 0.69f, 0.64f, 0.59f, 1.0f,
+
+        -0.5f, 0.5f, 0.0f, 0.45f, 0.58f, 0.68f, 1.0f,
+        0.0f, 0.0f, 1.0f, 0.45f, 0.58f, 0.68f, 1.0f,
+        0.5f, 0.5f, 0.0f, 0.45f, 0.58f, 0.68f, 1.0f,
+
+        0.5f, 0.5f, 0.0f, 0.33f, 0.48f, 0.58f, 1.0f,
+        0.0f, 0.0f, 1.0f, 0.33f, 0.48f, 0.58f, 1.0f,
+        0.5f, -0.5f, 0.0f, 0.33f, 0.48f, 0.58f, 1.0f,
+
+        0.5f, -0.5f, 0.0f, 0.36f, 0.36f, 0.38f, 1.0f,
+        -0.5f, -0.5f, 0.0f, 0.36f, 0.36f, 0.38f, 1.0f,
+        -0.5f, 0.5f, 0.0f, 0.36f, 0.36f, 0.38f, 1.0f,
+        0.5f, 0.5f, 0.0f, 0.36f, 0.36f, 0.38f, 1.0f
     };
 
     // Generating the buffer and loading the vertex data into it.
@@ -41,7 +56,7 @@ void SimpleShapeApplication::init() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     std::vector<GLushort> indexes = {
-        0, 1, 2, 2, 3, 0, 0, 3, 4
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 12, 14, 15
     };
 
     // Generating the buffer and loading the indexes data into it.
@@ -52,7 +67,7 @@ void SimpleShapeApplication::init() {
 
     GLuint UBO_modifier;
     float strength = 0.7f;
-    std::array<float, 3> color = {0.0f, 0.4f, 1.0f};
+    std::array<float, 3> color = {1.0f, 1.0f, 1.0f};
     glGenBuffers(1, &UBO_modifier);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, UBO_modifier);
     glBindBuffer(GL_UNIFORM_BUFFER, UBO_modifier);
@@ -69,18 +84,19 @@ void SimpleShapeApplication::init() {
     );
 
     glm::mat4 view = glm::lookAt(
-        glm::vec3(3, 3, 7),
+        glm::vec3(0, 0, 2),
         glm::vec3(0, 0, 0),
-        glm::vec3(0, 1, 0)
+        glm::vec3(0, -1, 0)
     );
 
     glm::mat4 model(1.0f);
 
     glm::mat4 PVM = projection * view * model;
 
-    glGenBuffers(1, &UBO_modifier);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, UBO_modifier);
-    glBindBuffer(GL_UNIFORM_BUFFER, UBO_modifier);
+    GLuint UBO_PVM;
+    glGenBuffers(1, &UBO_PVM);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, UBO_PVM);
+    glBindBuffer(GL_UNIFORM_BUFFER, UBO_PVM);
     glBufferData(GL_UNIFORM_BUFFER, 16 * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, 4 * sizeof(GLfloat), &PVM[0]);
     glBufferSubData(GL_UNIFORM_BUFFER, 4 * sizeof(GLfloat), 4 * sizeof(GLfloat), &PVM[1]);
@@ -99,7 +115,8 @@ void SimpleShapeApplication::init() {
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     // and this specifies how the data is layout in the buffer.
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(0));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(0));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), reinterpret_cast<GLvoid *>(3 * sizeof(GLfloat)));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBO_indexes);
@@ -122,6 +139,8 @@ void SimpleShapeApplication::init() {
 void SimpleShapeApplication::frame() {
     // Binding the VAO will setup all the required vertex buffers.
     glBindVertexArray(vao_);
-    glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_SHORT, nullptr);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_SHORT, nullptr);
     glBindVertexArray(0);
 }
