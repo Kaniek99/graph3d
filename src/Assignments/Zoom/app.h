@@ -9,6 +9,7 @@
 #include "Application/application.h"
 #include "Application/utils.h"
 #include <glm/glm.hpp>
+#include "camera.h"
 
 #include "glad/gl.h"
 
@@ -23,16 +24,16 @@ public:
 
     void framebuffer_resize_callback(int w, int h) override;
 
+    void scroll_callback(double xoffset, double yoffset) override;
+
+    void set_camera(Camera *camera) { camera_ = camera; }
+
+    Camera *camera() { return camera_; }
+
+    ~SimpleShapeApplication() { delete camera_; }
+
 private:
     GLuint vao_;
     GLuint UBO_PVM_;
-
-    float fov_;
-    float aspect_;
-    float near_;
-    float far_;
-
-    glm::mat4 P_;
-    glm::mat4 V_;
-    glm::mat4 M_;
+    Camera *camera_;
 };

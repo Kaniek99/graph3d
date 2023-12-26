@@ -3,6 +3,7 @@
 //
 
 #include "app.h"
+// #include "camera.h"
 
 #include <iostream>
 #include <vector>
@@ -23,6 +24,8 @@ void SimpleShapeApplication::init() {
         std::cerr << "Invalid program" << std::endl;
         exit(-1);
     }
+
+    set_camera(new Camera);
 
     // A vector containing the x,y,z vertex coordinates for the pyramid.
     std::vector<GLfloat> vertices = {
@@ -79,16 +82,14 @@ void SimpleShapeApplication::init() {
     int w,h;
     std::tie(w,h) = frame_buffer_size();
 
-    aspect_ = (float)w/h;
-    fov_ = glm::pi<float>()/4.0;
-    near_ = 0.1f;
-    far_ = 100.0f;
+    GLfloat aspect = (float)w/h;
+    GLfloat fov = glm::pi<float>()/4.0;
+    GLfloat near = 0.1f;
+    GLfloat far = 100.0f;
 
-    P_ = glm::perspective(fov_, aspect_, near_, far_);
-    V_ = glm::lookAt(glm::vec3(0, 0, 2), glm::vec3(0, 0, 0), glm::vec3(0, -1, 0));
-    M_ = glm::mat4(1.0f);
+    camera_->perspective(fov, aspect, near, far);
 
-    glm::mat4 PVM = P_ * V_ * M_;
+    camera_->look_at(glm::vec3(0, 0, 2), glm::vec3(0, 0, 0), glm::vec3(0, -1, 0));
 
     glGenBuffers(1, &UBO_PVM_);
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, UBO_PVM_);
@@ -128,7 +129,7 @@ void SimpleShapeApplication::init() {
 
 //This functions is called every frame and does the actual rendering.
 void SimpleShapeApplication::frame() {
-    auto PVM = P_ * V_ * M_;
+    auto PVM = camera_->projection() * camera_->view();
     glBindBuffer(GL_UNIFORM_BUFFER, UBO_PVM_);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &PVM[0]);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -144,6 +145,10 @@ void SimpleShapeApplication::frame() {
 void SimpleShapeApplication::framebuffer_resize_callback(int w, int h) {
     Application::framebuffer_resize_callback(w, h);
     glViewport(0, 0, w, h);
-    aspect_ = (float) w / h;
-    P_ = glm::perspective(fov_, aspect_, near_, far_);
+    camera_->set_aspect((float) w / h);
+}
+
+void SimpleShapeApplication::scroll_callback(double xoffset, double yoffset) {
+         Application::scroll_callback(xoffset, yoffset);
+         camera()->zoom(yoffset / 30.0f);
 }
