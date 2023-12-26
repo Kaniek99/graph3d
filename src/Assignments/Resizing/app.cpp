@@ -76,32 +76,24 @@ void SimpleShapeApplication::init() {
     glBufferSubData(GL_UNIFORM_BUFFER, 4 * sizeof(GLfloat), 3 * sizeof(GLfloat), &color);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    glm::mat4 projection = glm::perspective(
-        glm::radians(60.0f),
-        16.0f / 9.0f,
-        0.1f,
-        100.0f
-    );
+    int w,h;
+    std::tie(w,h) = frame_buffer_size();
 
-    glm::mat4 view = glm::lookAt(
-        glm::vec3(0, 0, 2),
-        glm::vec3(0, 0, 0),
-        glm::vec3(0, -1, 0)
-    );
+    aspect_ = (float)w/h;
+    fov_ = glm::pi<float>()/4.0;
+    near_ = 0.1f;
+    far_ = 100.0f;
 
-    glm::mat4 model(1.0f);
+    P_ = glm::perspective(fov_, aspect_, near_, far_);
+    V_ = glm::lookAt(glm::vec3(0, 0, 2), glm::vec3(0, 0, 0), glm::vec3(0, -1, 0));
+    M_ = glm::mat4(1.0f);
 
-    glm::mat4 PVM = projection * view * model;
+    glm::mat4 PVM = P_ * V_ * M_;
 
-    GLuint UBO_PVM;
-    glGenBuffers(1, &UBO_PVM);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, UBO_PVM);
-    glBindBuffer(GL_UNIFORM_BUFFER, UBO_PVM);
-    glBufferData(GL_UNIFORM_BUFFER, 16 * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, 4 * sizeof(GLfloat), &PVM[0]);
-    glBufferSubData(GL_UNIFORM_BUFFER, 4 * sizeof(GLfloat), 4 * sizeof(GLfloat), &PVM[1]);
-    glBufferSubData(GL_UNIFORM_BUFFER, 8 * sizeof(GLfloat), 4 * sizeof(GLfloat), &PVM[2]);
-    glBufferSubData(GL_UNIFORM_BUFFER, 12 * sizeof(GLfloat), 4 * sizeof(GLfloat), &PVM[3]);
+    glGenBuffers(1, &UBO_PVM_);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, UBO_PVM_);
+    glBindBuffer(GL_UNIFORM_BUFFER, UBO_PVM_);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     // This setups a Vertex Array Object (VAO) that  encapsulates
@@ -123,13 +115,12 @@ void SimpleShapeApplication::init() {
     glBindVertexArray(0);
     //end of vao "recording"
 
-     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     // Setting the background color of the rendering window,
     // I suggest not to use white or black for better debuging.
     glClearColor(0.81f, 0.81f, 0.8f, 1.0f);
 
-    // This setups an OpenGL vieport of the size of the whole rendering window.
-    auto[w, h] = frame_buffer_size();
+    // This setups an OpenGL viewport of the size of the whole rendering window.
     glViewport(0, 0, w, h);
 
     glUseProgram(program);
@@ -137,10 +128,22 @@ void SimpleShapeApplication::init() {
 
 //This functions is called every frame and does the actual rendering.
 void SimpleShapeApplication::frame() {
+    auto PVM = P_ * V_ * M_;
+    glBindBuffer(GL_UNIFORM_BUFFER, UBO_PVM_);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &PVM[0]);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
     // Binding the VAO will setup all the required vertex buffers.
     glBindVertexArray(vao_);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_SHORT, nullptr);
     glBindVertexArray(0);
+}
+
+void SimpleShapeApplication::framebuffer_resize_callback(int w, int h) {
+    Application::framebuffer_resize_callback(w, h);
+    glViewport(0, 0, w, h);
+    aspect_ = (float) w / h;
+    P_ = glm::perspective(fov_, aspect_, near_, far_);
 }
