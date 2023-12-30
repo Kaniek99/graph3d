@@ -26,6 +26,7 @@ void SimpleShapeApplication::init() {
     }
 
     set_camera(new Camera);
+    set_controler(new CameraControler(camera()));
 
     // A vector containing the x,y,z vertex coordinates for the pyramid.
     std::vector<GLfloat> vertices = {
@@ -151,4 +152,27 @@ void SimpleShapeApplication::framebuffer_resize_callback(int w, int h) {
 void SimpleShapeApplication::scroll_callback(double xoffset, double yoffset) {
          Application::scroll_callback(xoffset, yoffset);
          camera()->zoom(yoffset / 30.0f);
+}
+
+void SimpleShapeApplication::mouse_button_callback(int button, int action, int mods) {
+    Application::mouse_button_callback(button, action, mods);
+
+    if (controler_) {
+        double x, y;
+        glfwGetCursorPos(window_, &x, &y);
+
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+            controler_->LMB_pressed(x, y);
+
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+            controler_->LMB_released(x, y);
+    }
+
+}
+
+void SimpleShapeApplication::cursor_position_callback(double x, double y) {
+    Application::cursor_position_callback(x, y);
+    if (controler_) {
+        controler_->mouse_moved(x, y);
+    }
 }
