@@ -14,10 +14,6 @@
 
 #include "Application/utils.h"
 
-#define STB_IMAGE_IMPLEMENTATION  1
-
-#include "3rdParty/stb/stb_image.h"
-
 void SimpleShapeApplication::init() {
     // A utility function that reads the shader sources, compiles them and creates the program object
     auto program = xe::utils::create_program(
@@ -31,14 +27,6 @@ void SimpleShapeApplication::init() {
 
     set_camera(new Camera);
     set_controler(new CameraControler(camera()));
-
-    stbi_set_flip_vertically_on_load(true);
-    GLint width, height, channels;
-    auto texture_file = std::string(ROOT_DIR) + "/Models/multicolor.png"
-    auto img = stbi_load(texture_file, &width, &height, &channels, 0);
-    if (!img) {
-        spdlog::warn("Could not read image from file `{}'", texture_file);
-    }
 
     // A vector containing the x,y,z vertex coordinates for the pyramid.
     std::vector<GLfloat> vertices = {
