@@ -9,9 +9,10 @@
 #include "Application/application.h"
 #include "Application/utils.h"
 #include <glm/glm.hpp>
+
 #include "camera.h"
 #include "camera_controler.h"
-
+#include "Engine/Mesh.h"
 #include "glad/gl.h"
 
 class SimpleShapeApplication : public xe::Application
@@ -39,9 +40,14 @@ public:
 
     void cursor_position_callback(double x, double y) override;
 
+    void add_submesh(xe::Mesh *mesh) { meshes_.push_back(mesh); }
+
 private:
     GLuint vao_;
     GLuint UBO_PVM_;
+
     Camera *camera_;
     CameraControler *controler_;
+
+    std::vector<xe::Mesh*> meshes_;
 };
