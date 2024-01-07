@@ -16,10 +16,7 @@
 #include "Application/utils.h"
 #include "Engine/Mesh.h"
 #include "Engine/Material.h"
-
-#define STB_IMAGE_IMPLEMENTATION  1
-
-#include "3rdParty/stb/stb_image.h"
+#include "Engine/mesh_loader.h"
 
 void SimpleShapeApplication::init() {
     // A utility function that reads the shader sources, compiles them and creates the program object
@@ -36,23 +33,6 @@ void SimpleShapeApplication::init() {
 
     set_camera(new Camera);
     set_controler(new CameraControler(camera()));
-
-    stbi_set_flip_vertically_on_load(true);
-    GLint width, height, channels;
-    auto texture_file = std::string(ROOT_DIR) + "/Models/multicolor.png";
-    auto img = stbi_load(texture_file.c_str(), &width, &height, &channels, 0);
-    GLuint texture;
-
-    if (!img) {
-        spdlog::warn("Could not read image from file `{}'", texture_file);
-    } else {
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, img);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glBindTexture(GL_TEXTURE_2D, 0u);
-    }
 
     // A vector containing the x,y,z vertex coordinates for the pyramid.
     std::vector<GLfloat> vertices = {
@@ -86,14 +66,9 @@ void SimpleShapeApplication::init() {
     };
 
     auto pyramid = new xe::Mesh;
-    pyramid->allocate_vertex_buffer(vertices.size() * sizeof(GLfloat), GL_STATIC_DRAW);
-    pyramid->load_vertices(0, vertices.size() * sizeof(GLfloat), vertices.data());
-    pyramid->vertex_attrib_pointer(0, 3, GL_FLOAT, 5 * sizeof(GLfloat), 0);
-    pyramid->vertex_attrib_pointer(1, 2, GL_FLOAT, 5 * sizeof(GLfloat), 3 * sizeof(GLfloat));
-    pyramid->allocate_index_buffer(indexes.size() * sizeof(GLfloat), GL_STATIC_DRAW);
-    pyramid->load_indices(0, indexes.size() * sizeof(GLfloat), indexes.data());
+    pyramid = xe::load_mesh_from_obj(std::string(ROOT_DIR) + "/Models/blue_marble.obj",
+                                          std::string(ROOT_DIR) + "/Models");
 
-    pyramid->add_submesh(0, 18, new xe::ColorMaterial({1.0f, 1.0f, 1.0f, 1.0f}, texture, 1));
     add_submesh(pyramid);
 
     GLuint UBO_modifier;

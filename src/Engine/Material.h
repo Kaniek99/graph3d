@@ -52,7 +52,7 @@ namespace xe {
         glm::vec4 color_;
     };
 
-
+    GLuint create_texture(const std::string &name);
 }
 
 
