@@ -14,7 +14,7 @@
 
 #include "Application/utils.h"
 #include "Engine/Mesh.h"
-#include "Engine/Material.h"
+#include "Engine/ColorMaterial.h"
 
 void SimpleShapeApplication::init() {
     // A utility function that reads the shader sources, compiles them and creates the program object

@@ -2,7 +2,7 @@
 // Created by Piotr Białas on 04/11/2021.
 //
 
-
+#define GLM_ENABLE_EXPERIMENTAL
 
 #include "mesh_loader.h"
 

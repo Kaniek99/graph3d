@@ -3,7 +3,6 @@
 //
 
 #include "app.h"
-// #include "camera.h"
 
 #include <iostream>
 #include <vector>
@@ -15,7 +14,8 @@
 #include "spdlog/spdlog.h"
 #include "Application/utils.h"
 #include "Engine/Mesh.h"
-#include "Engine/Material.h"
+#include "Engine/ColorMaterial.h"
+#include "Engine/PhongMaterial.h"
 #include "Engine/mesh_loader.h"
 
 void SimpleShapeApplication::init() {
@@ -29,7 +29,25 @@ void SimpleShapeApplication::init() {
         exit(-1);
     }
 
-    xe::ColorMaterial::init();
+    // xe::ColorMaterial::init();
+    xe::PhongMaterial::init();
+
+    xe::PointLight light(
+        // glm::vec3(0.0f, 0.0f, 1.0f),
+        glm::vec3(0.0f, 0.0f, 0.3f),
+        glm::vec3(1.0f, 1.0f, 1.0f),
+        1.0f,
+        1.0f
+    );
+
+    add_light(light);
+    add_ambient(glm::vec3(0.9f,0.3f,0.6f));
+
+    glGenBuffers(1, &lightBuffer_);
+    glBindBuffer(GL_UNIFORM_BUFFER, lightBuffer_);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::vec3) + sizeof(GLuint) + sizeof(xe::PointLight)*n_p_lights_, nullptr, GL_STATIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 2, lightBuffer_);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     set_camera(new Camera);
     set_controler(new CameraControler(camera()));
@@ -66,7 +84,7 @@ void SimpleShapeApplication::init() {
     };
 
     auto pyramid = new xe::Mesh;
-    pyramid = xe::load_mesh_from_obj(std::string(ROOT_DIR) + "/Models/blue_marble.obj",
+    pyramid = xe::load_mesh_from_obj(std::string(ROOT_DIR) + "/Models/square.obj",
                                           std::string(ROOT_DIR) + "/Models");
 
     add_submesh(pyramid);
@@ -97,7 +115,7 @@ void SimpleShapeApplication::init() {
     glGenBuffers(1, &UBO_PVM_);
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, UBO_PVM_);
     glBindBuffer(GL_UNIFORM_BUFFER, UBO_PVM_);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4) + 3 * sizeof(glm::vec4), nullptr, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     // Setting the background color of the rendering window,
@@ -113,8 +131,35 @@ void SimpleShapeApplication::init() {
 //This functions is called every frame and does the actual rendering.
 void SimpleShapeApplication::frame() {
     auto PVM = camera_->projection() * camera_->view();
+    glm::mat4 M = glm::mat4(1.0f);
+    auto VM = camera_->view()*M;
+    auto R = glm::mat3(VM);
+    auto N = glm::mat3(glm::cross(R[1], R[2]), glm::cross(R[2], R[0]), glm::cross(R[0], R[1]));
     glBindBuffer(GL_UNIFORM_BUFFER, UBO_PVM_);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &PVM[0]);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &VM[0]);
+    // According to the std140 we send each column separately. Each column must be separated by a float.
+    for (int column = 0; column < 3; column++) {
+        auto offset = column * (sizeof(glm::vec3) + sizeof(float));
+        auto columnOffset = 2 * sizeof(glm::mat4) + offset;
+        glBufferSubData(GL_UNIFORM_BUFFER, columnOffset, sizeof(glm::vec3), &N[column][0]);
+        columnOffset += sizeof(glm::vec3);
+        glBufferSubData(GL_UNIFORM_BUFFER, columnOffset, sizeof(float), nullptr);
+    }
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    glBindBuffer(GL_UNIFORM_BUFFER, lightBuffer_);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec3), &ambient_);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec3), sizeof(GLuint), &n_p_lights_);
+
+    for (GLuint i = 0; i < n_p_lights_; i++) {
+        xe::PointLight& light = p_lights_[i];
+        light.position_in_vs = glm::vec3(VM * glm::vec4(light.position_in_ws, 1.0f));
+
+        auto lightOffset = sizeof(glm::vec3) + sizeof(GLuint) + i * sizeof(xe::PointLight);
+        glBufferSubData(GL_UNIFORM_BUFFER, lightOffset, sizeof(xe::PointLight), &light);
+    }
+
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     glEnable(GL_DEPTH_TEST);

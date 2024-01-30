@@ -12,6 +12,7 @@
 
 #include "camera.h"
 #include "camera_controler.h"
+#include "Engine/Light.h"
 #include "Engine/Mesh.h"
 #include "glad/gl.h"
 
@@ -42,12 +43,25 @@ public:
 
     void add_submesh(xe::Mesh *mesh) { meshes_.push_back(mesh); }
 
+    void add_light(const xe::PointLight &p_light) {
+        p_lights_.push_back(p_light);
+        n_p_lights_ ++;
+    }
+
+    void add_ambient(glm::vec3 ambient) {
+                ambient_ = ambient;
+    }
+
 private:
     GLuint vao_;
     GLuint UBO_PVM_;
+    GLuint lightBuffer_;
+    GLuint n_p_lights_;
 
     Camera *camera_;
     CameraControler *controler_;
 
+    glm::vec3 ambient_;
     std::vector<xe::Mesh*> meshes_;
+    std::vector<xe::PointLight> p_lights_;
 };

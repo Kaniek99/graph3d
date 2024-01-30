@@ -1,6 +1,7 @@
 //
 // Created by Piotr Białas on 26/11/2021.
 //
+#define GLM_ENABLE_EXPERIMENTAL
 
 #include "Node.h"
 
