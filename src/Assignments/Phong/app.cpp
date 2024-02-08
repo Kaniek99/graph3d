@@ -41,6 +41,7 @@ void SimpleShapeApplication::init() {
     );
 
     add_light(light);
+    // add_light(xe::PointLight(glm::vec3(1.0f, 1.0f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 1.0f));
     add_ambient(glm::vec3(0.9f,0.3f,0.6f));
 
     glGenBuffers(1, &lightBuffer_);

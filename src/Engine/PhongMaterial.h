@@ -9,9 +9,15 @@
 namespace xe {
     class PhongMaterial : public Material {
     public:
+        glm::vec4 Kd;
+        glm::vec4 Ka;
+        glm::vec4 Ks;
+        GLuint map_Kd;
+        const GLuint map_Kd_unit;
+        float Ns;
 
-        PhongMaterial(const glm::vec4 color, GLuint texture, GLuint texture_unit) : color_(color), texture_(texture),
-                                                                                    texture_unit_(texture_unit) {}
+        PhongMaterial(const glm::vec4 color, GLuint texture, GLuint texture_unit) : Kd(color), map_Kd(texture),
+                                                                                    map_Kd_unit(0) {}
 
         PhongMaterial(const glm::vec4 color, GLuint texture) : PhongMaterial(color, texture, 0) {}
 
@@ -23,22 +29,14 @@ namespace xe {
 
         static GLuint program() { return shader_; }
 
-        GLuint texture() const { return texture_; }
+        GLuint texture() const { return map_Kd; }
 
-        void set_texture(GLuint texture) { texture_ = texture; }
-
-        GLuint texture_unit() const { return texture_unit_; }
-
-        void set_texture_unit(GLuint texture_unit) { texture_unit_ = texture_unit; }
+        void set_texture(GLuint texture) { map_Kd = texture; }
 
     private:
         static GLuint shader_;
         static GLuint color_uniform_buffer_;
         static GLint uniform_map_Kd_location_;
-
-        GLuint texture_;
-        GLuint texture_unit_;
-        glm::vec4 color_;
     };
 
 }

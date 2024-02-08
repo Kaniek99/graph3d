@@ -17,18 +17,21 @@ namespace xe {
     void PhongMaterial::bind() {
         bool use_map_Kd = 0;
 
-        if (texture_ > 0) {
-            glUniform1i(uniform_map_Kd_location_, texture_unit_);
-            glActiveTexture(GL_TEXTURE0 + texture_unit_);
-            glBindTexture(GL_TEXTURE_2D, texture_);
+        if (map_Kd > 0) {
+            glUniform1i(uniform_map_Kd_location_, map_Kd_unit);
+            glActiveTexture(GL_TEXTURE0 + map_Kd_unit);
+            glBindTexture(GL_TEXTURE_2D, map_Kd);
             use_map_Kd = 1;
         }
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, color_uniform_buffer_);
         glUseProgram(program());
         glBindBuffer(GL_UNIFORM_BUFFER, color_uniform_buffer_);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4), &color_[0]);
-        glBufferSubData(GL_UNIFORM_BUFFER, 4 * sizeof(float), sizeof(bool), &use_map_Kd);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4), &Kd[0]);
+        glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec4), sizeof(glm::vec4), &Ka[0]);
+        glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::vec4), sizeof(glm::vec4), &Ks[0]);
+        glBufferSubData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::vec4), sizeof(float), &Ns);
+        glBufferSubData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::vec4) + sizeof(float), sizeof(bool), &use_map_Kd);
         glBindBuffer(GL_UNIFORM_BUFFER, 0u);
     }
 
@@ -48,7 +51,7 @@ namespace xe {
         glGenBuffers(1, &color_uniform_buffer_);
 
         glBindBuffer(GL_UNIFORM_BUFFER, color_uniform_buffer_);
-        glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::vec4) + sizeof(bool), nullptr, GL_STATIC_DRAW);
+        glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::vec4) + sizeof(float) + sizeof(bool), nullptr, GL_STATIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0u);
 #if __APPLE__
         auto u_modifiers_index = glGetUniformBlockIndex(program, "Color");
