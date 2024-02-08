@@ -46,13 +46,13 @@ void main() {
         vec3 specular;
         vec3 camera_position_in_view_space = vec3(0.0f);
         vec3 view_vector = normalize(camera_position_in_view_space - vertex_coords_in_vs.xyz);
-        float spec = pow(max(dot(view_vector, normal), 0.0f), Ns);
+        // float spec = pow(max(dot(view_vector, normal), 0.0f), Ns);
         for (uint i = 0u; i < n_p_lights; i++) {
             vec3 lightDir = normalize(p_light[i].position_in_view_space - vertex_coords_in_vs.xyz);
             float diff = max(dot(normal, lightDir), 0.0f);
             diffuse += diff * p_light[i].color; // * p_light[i].intensity;
-            // vec3 reflectDir = reflect(-lightDir, normal);
-            // float spec = pow(max(dot(lightDir, normal), 0.0f), 500.0);
+            vec3 reflect_dir = reflect(-lightDir, normal);
+            float spec = pow(max(dot(view_vector, reflect_dir), 0.0f), Ns);
             specular += spec * p_light[i].color; // * specularStrength
         }
 
